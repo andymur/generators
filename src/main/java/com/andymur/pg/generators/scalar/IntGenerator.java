@@ -4,6 +4,9 @@ import com.andymur.pg.generators.core.Generator;
 import com.andymur.pg.generators.rand.DefaultRand;
 import com.andymur.pg.generators.rand.Rand;
 
+import java.util.function.Function;
+import java.util.function.Supplier;
+
 /**
  * Created by andymur on 10/31/17.
  */
@@ -13,21 +16,34 @@ public class IntGenerator implements Generator<Integer> {
 
     private Range<Integer> range;
     private Rand randSource;
+    private Function<Integer, Boolean> filterFunction = (x) -> true;
+    private Supplier<Integer> generateFunction;
 
     private IntGenerator() {
     }
 
-    // create generation function, filtration function
     @Override
     public Integer generate() {
-        if (range == null) {
-            return randSource.nextInt(DEFAULT_CEIL);
+        if (generateFunction != null) {
+            return generateAndFilter(generateFunction);
+        } else if (range == null) {
+            return generateAndFilter(() -> randSource.nextInt(DEFAULT_CEIL));
         } else {
             int to = range.getTo().orElse(DEFAULT_CEIL);
             int from = range.getFrom().orElse(0);
 
             // 10, 32 -> random(22) + 10
-            return randSource.nextInt(from, to);
+            return generateAndFilter(() -> randSource.nextInt(from, to));
+        }
+    }
+
+    private Integer generateAndFilter(Supplier<Integer> supplier) {
+        while (true) {
+            int candidate = supplier.get();
+
+            if (filterFunction.apply(candidate)) {
+                return candidate;
+            }
         }
     }
 
@@ -35,6 +51,8 @@ public class IntGenerator implements Generator<Integer> {
 
         private Range<Integer> range;
         private Rand randSource;
+        private Function<Integer, Boolean> filterFunction;
+        private Supplier<Integer> supplier;
 
         public static IntGeneratorBuilder of() {
             return new IntGeneratorBuilder();
@@ -62,8 +80,8 @@ public class IntGenerator implements Generator<Integer> {
             return this;
         }
 
-        public IntGeneratorBuilder withRange(Range<Integer> range) {
-            this.range = range;
+        public IntGeneratorBuilder withRange(int from, int to) {
+            this.range = new Range<>(from, to);
             return this;
         }
 
@@ -72,10 +90,28 @@ public class IntGenerator implements Generator<Integer> {
             return this;
         }
 
+        public IntGeneratorBuilder withFilter(Function<Integer, Boolean> filterFunction) {
+            this.filterFunction = filterFunction;
+            return this;
+        }
+
+        public IntGeneratorBuilder withGenerator(Supplier<Integer> generateFunction) {
+            this.supplier = generateFunction;
+            return this;
+        }
+
+        //TODO: check that constant is consistent with filter function
+        public IntGeneratorBuilder withConstant(Integer constant) {
+            this.supplier = () -> constant;
+            return this;
+        }
+
         public IntGenerator build() {
             IntGenerator generator = new IntGenerator();
             generator.range = range;
             generator.randSource = randSource == null ? new DefaultRand() : randSource;
+            generator.filterFunction = filterFunction == null ? (x) -> true : filterFunction;
+            generator.generateFunction = supplier;
             return generator;
         }
 

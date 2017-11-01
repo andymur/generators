@@ -37,12 +37,68 @@ public class IntGeneratorTest {
         IntGenerator generator = IntGenerator
                 .IntGeneratorBuilder
                 .of()
-                .withRange(new Range<>(10, 22))
+                .withRange(10, 22)
                 .build();
 
         for (int i = 0; i < 1_000_000; i++) {
             Assert.assertTrue(generator.generate() >= 10);
             Assert.assertTrue(generator.generate() < 22);
+        }
+    }
+
+    @Test
+    public void testGenerationFromRange() {
+
+        IntGenerator generator = IntGenerator
+                .IntGeneratorBuilder
+                .of()
+                .from(10)
+                .build();
+
+        for (int i = 0; i < 1_000_000; i++) {
+            Assert.assertTrue(generator.generate() >= 10);
+        }
+    }
+
+    @Test
+    public void testGenerationToRange() {
+
+        IntGenerator generator = IntGenerator
+                .IntGeneratorBuilder
+                .of()
+                .to(22)
+                .build();
+
+        for (int i = 0; i < 1_000_000; i++) {
+            Assert.assertTrue(generator.generate() < 22);
+        }
+    }
+
+    @Test
+    public void testGenerationWithFilter() {
+
+        IntGenerator generator = IntGenerator
+                .IntGeneratorBuilder
+                .of()
+                .withFilter((x) -> x % 2 == 0)
+                .build();
+
+        for (int i = 0; i < 1_000_000; i++) {
+            Assert.assertTrue(generator.generate() % 2 == 0);
+        }
+    }
+
+    @Test
+    public void testGenerationWithConstant() {
+
+        IntGenerator generator = IntGenerator
+                .IntGeneratorBuilder
+                .of()
+                .withConstant(42)
+                .build();
+
+        for (int i = 0; i < 1_000_000; i++) {
+            Assert.assertTrue(generator.generate() == 42);
         }
     }
 }
