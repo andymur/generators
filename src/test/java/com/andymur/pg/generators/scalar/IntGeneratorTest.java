@@ -1,7 +1,6 @@
 package com.andymur.pg.generators.scalar;
 
 import com.andymur.pg.generators.rand.Rand;
-import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -9,6 +8,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
@@ -142,24 +142,84 @@ public class IntGeneratorTest {
         }
     }
 
-    @Test
+    @Test(expected = IllegalStateException.class)
     public void testGenerationFromSetWithNoRepetition() {
 
-        Set<Integer> fromSet = new HashSet<>(Arrays.asList(1, 2, 3, 5, 8));
+        Set<Integer> fromSet = new HashSet<>(Arrays.asList(1, 2, 3, 5, 8, 13));
+        Set<Integer> resultSet = new HashSet<>(fromSet.size());
 
         IntGenerator generator = IntGenerator
                 .IntGeneratorBuilder
                 .of()
-                .fromSet(1, 2, 3, 5, 8, 13)
+                .fromSet(fromSet)
                 .withNoRepetition()
                 .build();
 
-        System.out.println(generator.generate());
-        System.out.println(generator.generate());
-        System.out.println(generator.generate());
-        System.out.println(generator.generate());
-        System.out.println(generator.generate());
-        System.out.println(generator.generate());
-        System.out.println(generator.generate());
+        for (Integer element: fromSet) {
+            resultSet.add(generator.generate());
+        }
+
+        assertEquals(fromSet, resultSet);
+        generator.generate();
+    }
+
+    @Test
+    public void testGenerationRangeWithFiltering() {
+        IntGenerator generator = IntGenerator
+                .IntGeneratorBuilder
+                .of()
+                .withRange(1, 101)
+                .withFilter(x -> x % 2 != 0)
+                .build();
+
+        for (int i = 0; i < 1_000_000; i++) {
+            int generated = generator.generate();
+            assertTrue("Generated value is " + generated + " must be in [1, 100]", generated <= 100 && generated >= 1);
+            assertTrue("Generated value is " + generated + " but can't be even!", generated % 2 != 0);
+        }
+    }
+
+    @Test
+    public void testGenerationFromSetWithRangeAndFiltering() {
+        Set<Integer> fromSet = new HashSet<>(Arrays.asList(1, 2, 3, 5, 8, 13));
+
+        IntGenerator generator = IntGenerator
+                .IntGeneratorBuilder
+                .of()
+                .withRange(1, 11)
+                .fromSet(fromSet)
+                .withFilter(x -> x % 2 != 0)
+                .build();
+
+        for (int i = 0; i < 1_000_000; i++) {
+            int generated = generator.generate();
+            assertTrue("Generated value is " + generated + " must be in [1, 2, 3, 5, 8, 13]", fromSet.contains(generated));
+            assertTrue("Generated value is " + generated + " must be in [1, 10]", generated <= 11 && generated >= 1);
+            assertTrue("Generated value is " + generated + " but can't be even!", generated % 2 != 0);
+        }
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void testGenerationFromSetWithRangeAndFilteringWithoutRepetition() {
+        Set<Integer> fromSet = new HashSet<>(Arrays.asList(1, 2, 3, 5, 8, 13));
+        Set<Integer> resultSet = new HashSet<>();
+
+        IntGenerator generator = IntGenerator
+                .IntGeneratorBuilder
+                .of()
+                .withRange(1, 11)
+                .fromSet(fromSet)
+                .withFilter(x -> x % 2 != 0)
+                .withNoRepetition()
+                .build();
+
+        for (int i = 0; i < 1_000_000; i++) {
+            int generated = generator.generate();
+            assertTrue("Generated value is " + generated + " must be in [1, 2, 3, 5, 8, 13]", fromSet.contains(generated));
+            assertTrue("Generated value is " + generated + " must be in [1, 10]", generated <= 10 && generated >= 1);
+            assertTrue("Generated value is " + generated + " but can't be even!", generated % 2 != 0);
+
+            assertTrue("Generated value is " + generated + " have been already generated", resultSet.add(generated));
+        }
     }
 }

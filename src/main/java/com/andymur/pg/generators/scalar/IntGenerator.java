@@ -11,23 +11,33 @@ import java.util.function.Supplier;
 
 /**
  * Created by andymur on 10/31/17.
+ * Non thread safe
  */
-//TODO: we have so many options so far, do we have conflicts and how should we do when use several of them together? think about it
 public class IntGenerator implements Generator<Integer> {
 
     private static final int DEFAULT_CEIL = 64;
-    //TODO: should we have default values for everything?
-    //TODO: do we need to make generator mutable
-    private Range<Integer> range;
-    private Rand randSource;
-    private Function<Integer, Boolean> filterFunction = (x) -> true;
-    private Supplier<Integer> generateFunction;
+    private final Range<Integer> range;
+    private final Rand randSource;
+    private final Function<Integer, Boolean> filterFunction;
+    private final Supplier<Integer> generateFunction;
 
-    private Set<Integer> fromSet = new HashSet<>();
-    private Set<Integer> alreadyGenerated = new CopyOnWriteArraySet<>();
-    private boolean noRepetition = false;
+    private final Set<Integer> fromSet;
+    private final boolean noRepetition;
 
-    private IntGenerator() {
+    private final Set<Integer> alreadyGenerated = new CopyOnWriteArraySet<>();
+
+    private IntGenerator(final Rand randSource, final Range<Integer> range,
+                         final Function<Integer, Boolean> filterFunction,
+                         final Supplier<Integer> generateFunction,
+                         final Set<Integer> fromSet,
+                         final boolean noRepetition
+                         ) {
+        this.randSource = randSource;
+        this.range = range;
+        this.filterFunction = filterFunction;
+        this.generateFunction = generateFunction;
+        this.fromSet = fromSet;
+        this.noRepetition = noRepetition;
     }
 
     @Override
@@ -36,12 +46,9 @@ public class IntGenerator implements Generator<Integer> {
             return generateAndFilter(this::generateUsingForSetGenerator);
         } else if (generateFunction != null) {
             return generateAndFilter(generateFunction);
-        } else if (range == null) {
-            return generateAndFilter(() -> randSource.nextInt(DEFAULT_CEIL));
         } else {
             int to = range.getTo().orElse(DEFAULT_CEIL);
             int from = range.getFrom().orElse(0);
-
             // 10, 32 -> random(22) + 10
             return generateAndFilter(() -> randSource.nextInt(from, to));
         }
@@ -72,7 +79,7 @@ public class IntGenerator implements Generator<Integer> {
                 unique = alreadyGenerated.add(candidate);
             }
 
-            if (filterFunction.apply(candidate) && unique) {
+            if (filterFunction.apply(candidate) && unique && range.contains(candidate)) {
                 return candidate;
             }
         }
@@ -80,7 +87,7 @@ public class IntGenerator implements Generator<Integer> {
 
     static class IntGeneratorBuilder {
 
-        private Range<Integer> range;
+        private Range<Integer> range = Range.empty();
         private Rand randSource;
         private Function<Integer, Boolean> filterFunction;
         private Supplier<Integer> supplier;
@@ -93,23 +100,16 @@ public class IntGenerator implements Generator<Integer> {
         }
 
         public IntGeneratorBuilder from(Integer from) {
-            if (range == null) {
-                range = new Range<>(from, null);
-            } else {
-                final Integer newTo = range.getTo().orElse(null);
-                range = new Range<>(from, newTo);
-            }
+
+            final Integer newTo = range.getTo().orElse(null);
+            range = new Range<>(from, newTo);
 
             return this;
         }
 
         public IntGeneratorBuilder to(Integer to) {
-            if (range == null) {
-                range = new Range<>(null, to);
-            } else {
-                final Integer newFrom = range.getFrom().orElse(null);
-                range = new Range<>(newFrom, to);
-            }
+            final Integer newFrom = range.getFrom().orElse(null);
+            range = new Range<>(newFrom, to);
 
             return this;
         }
@@ -136,8 +136,7 @@ public class IntGenerator implements Generator<Integer> {
 
         //TODO: check that constant is consistent with filter function
         public IntGeneratorBuilder withConstant(Integer constant) {
-            this.supplier = () -> constant;
-            return this;
+            return withGenerator(() -> constant);
         }
 
         public IntGeneratorBuilder fromSet(Integer ... numbers) {
@@ -157,14 +156,27 @@ public class IntGenerator implements Generator<Integer> {
 
 
         public IntGenerator build() {
-            IntGenerator generator = new IntGenerator();
-            generator.range = range;
-            generator.randSource = randSource == null ? new DefaultRand() : randSource;
-            generator.filterFunction = filterFunction == null ? (x) -> true : filterFunction;
-            generator.generateFunction = supplier;
-            generator.fromSet = fromSet;
-            generator.noRepetition = noRepetition;
-            return generator;
+            validateState();
+            return new IntGenerator(
+                    randSource == null ? new DefaultRand() : randSource,
+                    range,
+                    filterFunction != null ? filterFunction : (x) -> true,
+                    supplier,
+                    fromSet,
+                    noRepetition
+            );
+        }
+
+        private void validateState() {
+            if (supplier != null) {
+                if (noRepetition) {
+                    throw new IllegalStateException("Generator function cannot be used with no repetition flag");
+                }
+
+                if (!fromSet.isEmpty()) {
+                    throw new IllegalStateException("Generator function cannot be used along with set of possible generated values");
+                }
+            }
         }
     }
 }
