@@ -1,9 +1,12 @@
 package com.andymur.pg.generators.scalar;
 
 import com.andymur.pg.generators.core.Generator;
+import com.andymur.pg.generators.dest.Destination;
 import com.andymur.pg.generators.rand.DefaultRand;
 import com.andymur.pg.generators.rand.Rand;
+import com.andymur.pg.generators.source.SourceBuilder;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.function.Function;
@@ -54,6 +57,11 @@ public class IntGenerator implements Generator<Integer> {
         }
     }
 
+    @Override
+    public void toDestination(Destination<Integer> destination) throws IOException {
+        destination.write(this);
+    }
+
     private int generateUsingForSetGenerator() {
 
         final List<Integer> l = new ArrayList<>(fromSet);
@@ -85,7 +93,7 @@ public class IntGenerator implements Generator<Integer> {
         }
     }
 
-    static class IntGeneratorBuilder {
+    public static class IntGeneratorBuilder {
 
         private Range<Integer> range = Range.empty();
         private Rand randSource;
@@ -94,6 +102,7 @@ public class IntGenerator implements Generator<Integer> {
 
         private Set<Integer> fromSet = new HashSet<>();
         private boolean noRepetition = false;
+        private SourceBuilder sourceBuilder;
 
         public static IntGeneratorBuilder of() {
             return new IntGeneratorBuilder();
@@ -154,6 +163,11 @@ public class IntGenerator implements Generator<Integer> {
             return this;
         }
 
+
+        public IntGeneratorBuilder fromSource(SourceBuilder sourceBuilder) {
+            this.sourceBuilder = sourceBuilder;
+            return this;
+        }
 
         public IntGenerator build() {
             validateState();

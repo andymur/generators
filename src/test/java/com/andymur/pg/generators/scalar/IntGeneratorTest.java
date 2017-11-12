@@ -1,9 +1,13 @@
 package com.andymur.pg.generators.scalar;
 
+import com.andymur.pg.generators.dest.FileDestination;
 import com.andymur.pg.generators.rand.Rand;
+import com.andymur.pg.generators.source.SourceBuilder;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -221,5 +225,19 @@ public class IntGeneratorTest {
 
             assertTrue("Generated value is " + generated + " have been already generated", resultSet.add(generated));
         }
+    }
+
+    @Test
+    public void testGenerationFromSourceToDestination() throws IOException {
+
+        IntGenerator generator = IntGenerator
+                .IntGeneratorBuilder
+                .of()
+                .fromSource(SourceBuilder.of().withPath(Paths.get("")))
+                .build();
+
+        FileDestination<Integer> destination = new FileDestination<Integer>(Paths.get("").toFile());
+
+        generator.toDestination(destination);
     }
 }

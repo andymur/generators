@@ -1,7 +1,9 @@
 package com.andymur.pg.generators.scalar;
 
 import com.andymur.pg.generators.core.Generator;
+import com.andymur.pg.generators.dest.Destination;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -60,6 +62,11 @@ public class StringGenerator implements Generator<String> {
 
         return builder.toString();
 	}
+
+    @Override
+    public void toDestination(Destination<String> destination) throws IOException {
+        destination.write(this);
+    }
 
     int charToCodePoint(char c) {
         return Character.codePointAt(new char[] {c}, 0);
