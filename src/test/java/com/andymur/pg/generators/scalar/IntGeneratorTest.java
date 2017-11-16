@@ -2,6 +2,8 @@ package com.andymur.pg.generators.scalar;
 
 import com.andymur.pg.generators.dest.FileDestination;
 import com.andymur.pg.generators.rand.Rand;
+import com.andymur.pg.generators.source.FileSource;
+import com.andymur.pg.generators.source.FileSource.FileSourceBuilder;
 import com.andymur.pg.generators.source.SourceBuilder;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -233,7 +235,7 @@ public class IntGeneratorTest {
         IntGenerator generator = IntGenerator
                 .IntGeneratorBuilder
                 .of()
-                .fromSource(SourceBuilder.of().withPath(Paths.get("")))
+                .fromFileSource(FileSourceBuilder.<Integer>of().withPath("src/test/resources/test_source.txt"))
                 .build();
 
         FileDestination<Integer> destination = new FileDestination<Integer>(Paths.get("").toFile());

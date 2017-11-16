@@ -6,6 +6,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.function.Function;
 
@@ -16,6 +18,7 @@ public class FileSource<T> implements Source<T> {
 
     private static final int DEFAULT_BUFFER_SIZE = 65535;
     private static final String DEFAULT_DELIMITER = "\n";
+
     //TODO: use charset
     private static final Charset DEFAULT_CHARSET = Charset.defaultCharset();
 
@@ -96,5 +99,55 @@ public class FileSource<T> implements Source<T> {
         }
 
         return result;
+    }
+
+    public static class FileSourceBuilder<T> {
+
+        private Function<String, T> transformerFunction;
+        private String delimiter;
+        private Path pathToFile;
+
+        public static <T> FileSourceBuilder<T> of() {
+            return new FileSourceBuilder<>();
+        }
+
+        public FileSourceBuilder<T> withPath(Path path) {
+            this.pathToFile = path;
+            return this;
+        }
+
+        public FileSourceBuilder<T> withPath(String pathToFile) {
+            this.pathToFile = Paths.get(pathToFile);
+            return this;
+        }
+
+        public FileSourceBuilder<T> withDelimiter(String delimiter) {
+            //TODO: add check for null in one style everywhere
+            this.delimiter = delimiter;
+            return this;
+        }
+
+        public FileSourceBuilder<T> withTransformerFunction(Function<String, T> transformerFunction) {
+            this.transformerFunction = transformerFunction;
+            return this;
+        }
+
+        public FileSource<T> build() {
+
+            if (pathToFile == null) {
+                throw new IllegalStateException("Path to File should be provided");
+            }
+
+            if (delimiter == null) {
+                delimiter = DEFAULT_DELIMITER;
+            }
+
+            if (transformerFunction == null) {
+                transformerFunction = x -> (T) x;
+            }
+
+            return new FileSource<>(transformerFunction, delimiter, pathToFile.toFile());
+        }
+
     }
 }

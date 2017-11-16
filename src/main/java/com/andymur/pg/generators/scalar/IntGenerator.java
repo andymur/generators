@@ -4,6 +4,8 @@ import com.andymur.pg.generators.core.Generator;
 import com.andymur.pg.generators.dest.Destination;
 import com.andymur.pg.generators.rand.DefaultRand;
 import com.andymur.pg.generators.rand.Rand;
+import com.andymur.pg.generators.source.FileSource;
+import com.andymur.pg.generators.source.FileSource.FileSourceBuilder;
 import com.andymur.pg.generators.source.SourceBuilder;
 
 import java.io.IOException;
@@ -102,7 +104,7 @@ public class IntGenerator implements Generator<Integer> {
 
         private Set<Integer> fromSet = new HashSet<>();
         private boolean noRepetition = false;
-        private SourceBuilder sourceBuilder;
+        private FileSourceBuilder<Integer> sourceBuilder;
 
         public static IntGeneratorBuilder of() {
             return new IntGeneratorBuilder();
@@ -164,13 +166,22 @@ public class IntGenerator implements Generator<Integer> {
         }
 
 
-        public IntGeneratorBuilder fromSource(SourceBuilder sourceBuilder) {
+        public IntGeneratorBuilder fromFileSource(FileSourceBuilder<Integer> sourceBuilder) {
             this.sourceBuilder = sourceBuilder;
             return this;
         }
 
         public IntGenerator build() {
+            if (sourceBuilder != null) {
+                try {
+                    fromSet = sourceBuilder.build().readSourceUnique();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
             validateState();
+
             return new IntGenerator(
                     randSource == null ? new DefaultRand() : randSource,
                     range,
