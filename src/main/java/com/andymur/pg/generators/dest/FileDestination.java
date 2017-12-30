@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 import java.util.EnumMap;
@@ -69,5 +71,34 @@ public class FileDestination<T> implements Destination<T> {
 
             writer.write(Arrays.copyOf(buffer.array(), buffer.position()));
         }
+    }
+
+    public static class FileDestinationBuilder<T> {
+
+        private Path pathToFile;
+
+        public static <T> FileDestinationBuilder<T> of() {
+            return new FileDestinationBuilder<>();
+        }
+
+        public FileDestinationBuilder<T> withPath(Path path) {
+            this.pathToFile = path;
+            return this;
+        }
+
+        public FileDestinationBuilder<T> withPath(String pathToFile) {
+            this.pathToFile = Paths.get(pathToFile);
+            return this;
+        }
+
+        public FileDestination<T> build() {
+
+            if (pathToFile == null) {
+                throw new IllegalStateException("Path to File should be provided");
+            }
+
+            return new FileDestination<>(pathToFile.toFile());
+        }
+
     }
 }

@@ -35,7 +35,7 @@ public class FileSource<T> implements Source<T> {
 
     @SuppressWarnings("unchecked")
     public FileSource(String delimiter, File sourceFile) {
-        this(x -> (T) x, DEFAULT_DELIMITER, sourceFile);
+        this(x ->  (T) Integer.valueOf(x), DEFAULT_DELIMITER, sourceFile);
     }
 
     public FileSource(Function<String, T> transformer, String delimiter, File sourceFile) {
@@ -108,7 +108,7 @@ public class FileSource<T> implements Source<T> {
         private Path pathToFile;
 
         public static <T> FileSourceBuilder<T> of() {
-            return new FileSourceBuilder<>();
+            return new FileSourceBuilder<T>();
         }
 
         public FileSourceBuilder<T> withPath(Path path) {
@@ -143,7 +143,7 @@ public class FileSource<T> implements Source<T> {
             }
 
             if (transformerFunction == null) {
-                transformerFunction = x -> (T) x;
+                transformerFunction = x -> (T) Integer.valueOf(x.trim());
             }
 
             return new FileSource<>(transformerFunction, delimiter, pathToFile.toFile());

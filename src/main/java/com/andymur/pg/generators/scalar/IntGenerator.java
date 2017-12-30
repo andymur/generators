@@ -2,11 +2,10 @@ package com.andymur.pg.generators.scalar;
 
 import com.andymur.pg.generators.core.Generator;
 import com.andymur.pg.generators.dest.Destination;
+import com.andymur.pg.generators.dest.FileDestination.FileDestinationBuilder;
 import com.andymur.pg.generators.rand.DefaultRand;
 import com.andymur.pg.generators.rand.Rand;
-import com.andymur.pg.generators.source.FileSource;
 import com.andymur.pg.generators.source.FileSource.FileSourceBuilder;
-import com.andymur.pg.generators.source.SourceBuilder;
 
 import java.io.IOException;
 import java.util.*;
@@ -105,6 +104,7 @@ public class IntGenerator implements Generator<Integer> {
         private Set<Integer> fromSet = new HashSet<>();
         private boolean noRepetition = false;
         private FileSourceBuilder<Integer> sourceBuilder;
+        private FileDestinationBuilder<Integer> destinationBuilder;
 
         public static IntGeneratorBuilder of() {
             return new IntGeneratorBuilder();
@@ -171,6 +171,11 @@ public class IntGenerator implements Generator<Integer> {
             return this;
         }
 
+        public IntGeneratorBuilder toFileSource(FileDestinationBuilder<Integer> destinationBuilder) {
+            this.destinationBuilder = destinationBuilder;
+            return this;
+        }
+
         public IntGenerator build() {
             if (sourceBuilder != null) {
                 try {
@@ -179,6 +184,7 @@ public class IntGenerator implements Generator<Integer> {
                     e.printStackTrace();
                 }
             }
+
 
             validateState();
 
