@@ -1,7 +1,6 @@
 package com.andymur.pg.generators.source;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,6 +10,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class FileSourceTest {
 
@@ -22,8 +23,8 @@ public class FileSourceTest {
         FileSource<Integer> fileSource= new FileSource<>(x -> Integer.valueOf(x.trim()), ",", inputFile);
         List<Integer> result = fileSource.readSource();
 
-        Assert.assertEquals(11, result.size());
-        Assert.assertEquals(Arrays.asList(1, 2, 3 , 4 , 5 , 6, 7, 8, 9, 10, 1), result);
+        assertEquals(11, result.size());
+        assertEquals(Arrays.asList(1, 2, 3 , 4 , 5 , 6, 7, 8, 9, 10, 1), result);
     }
 
     @Test
@@ -34,8 +35,8 @@ public class FileSourceTest {
         FileSource<Integer> fileSource= new FileSource<>(x -> Integer.valueOf(x.trim()), ",", inputFile);
         Set<Integer> result = fileSource.readSourceUnique();
 
-        Assert.assertEquals(10, result.size());
-        Assert.assertEquals(new HashSet<>(Arrays.asList(1, 2, 3 , 4 , 5 , 6, 7, 8, 9, 10)), result);
+        assertEquals(10, result.size());
+        assertEquals(new HashSet<>(Arrays.asList(1, 2, 3 , 4 , 5 , 6, 7, 8, 9, 10)), result);
     }
 
 }

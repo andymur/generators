@@ -1,9 +1,9 @@
 package com.andymur.pg.generators.scalar;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class StringGeneratorTest {
 
@@ -27,8 +27,8 @@ public class StringGeneratorTest {
 
         String generated = generator.generate();
 
-        assertNotNull("Generated cannot be null", generated);
-        assertEquals("Generated length is " + generated.length() + " while should be ten", 10, generated.length());
+        assertNotNull(generated, "Generated cannot be null");
+        assertEquals(10, generated.length(), "Generated length is " + generated.length() + " while should be ten");
 
         for (int i = 0; i < 1_000_000; i++) {
             generator.generate();
@@ -44,8 +44,8 @@ public class StringGeneratorTest {
 
         String generated = generator.generate();
 
-        assertNotNull("Generated cannot be null", generated);
-        assertEquals("Generated length is " + generated.length() + " while should be three", 3, generated.length());
+        assertNotNull(generated, "Generated cannot be null");
+        assertEquals(3, generated.length(), "Generated length is " + generated.length() + " while should be three");
 
         for (int i = 0; i < 100; i++) {
             System.out.println(generator.generate());

@@ -1,10 +1,11 @@
 package com.andymur.pg.generators.dest;
 
 import com.andymur.pg.generators.scalar.IntGenerator;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -24,5 +25,6 @@ public class FileDestinationTest {
         FileDestination<Integer> fileDestination = new FileDestination<>(outputFile);
 
         fileDestination.write(generator);
+        Files.delete(path);
     }
 }
