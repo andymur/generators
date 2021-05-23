@@ -58,11 +58,6 @@ public class IntGenerator implements Generator<Integer> {
         }
     }
 
-    @Override
-    public void toDestination(Destination<Integer> destination) throws IOException {
-        destination.write(this);
-    }
-
     private int generateUsingForSetGenerator() {
 
         final List<Integer> l = new ArrayList<>(fromSet);
@@ -82,6 +77,7 @@ public class IntGenerator implements Generator<Integer> {
             if (noRepetition) {
 
                 if (alreadyGenerated.equals(fromSet)) {
+                    //TODO: rethink behavior
                     throw new IllegalStateException("All possible already generated");
                 }
 

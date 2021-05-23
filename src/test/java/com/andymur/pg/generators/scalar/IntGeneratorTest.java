@@ -1,5 +1,6 @@
 package com.andymur.pg.generators.scalar;
 
+import com.andymur.pg.generators.core.Generators;
 import com.andymur.pg.generators.dest.FileDestination;
 import com.andymur.pg.generators.rand.Rand;
 import com.andymur.pg.generators.source.FileSource.FileSourceBuilder;
@@ -13,6 +14,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
@@ -93,7 +95,7 @@ public class IntGeneratorTest {
                 .build();
 
         for (int i = 0; i < 1_000_000; i++) {
-            assertTrue(generator.generate() % 2 == 0);
+            assertEquals(0, generator.generate() % 2);
         }
     }
 
@@ -107,7 +109,7 @@ public class IntGeneratorTest {
                 .build();
 
         for (int i = 0; i < 1_000_000; i++) {
-            assertTrue(generator.generate() == 42);
+            assertEquals(42, (int) generator.generate());
         }
     }
 
@@ -238,7 +240,6 @@ public class IntGeneratorTest {
                 .build();
 
         FileDestination<Integer> destination = new FileDestination<>(Paths.get("src/test/resources/test_destination.txt").toFile());
-
-        generator.toDestination(destination);
+        Generators.of(generator).toDestination(destination);
     }
 }

@@ -16,7 +16,7 @@ public class StringGenerator implements Generator<String> {
     private static final int DEFAULT_LENGTH = 10;
 
     private Function<String, Boolean> filterFunction = (x) -> true;
-    private Set<Character> fromSymbols = new HashSet<>();
+    private Set<Character> fromSymbols;
     private Set<String> fromSet = new HashSet<>();
 
     private IntGenerator codePointGenerator;
@@ -62,11 +62,6 @@ public class StringGenerator implements Generator<String> {
 
         return builder.toString();
 	}
-
-    @Override
-    public void toDestination(Destination<String> destination) throws IOException {
-        destination.write(this);
-    }
 
     int charToCodePoint(char c) {
         return Character.codePointAt(new char[] {c}, 0);

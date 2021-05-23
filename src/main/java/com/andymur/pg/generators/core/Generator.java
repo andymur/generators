@@ -7,7 +7,7 @@ import java.io.IOException;
 /**
  * Created by andymur on 10/31/17.
  */
+// TODO: add extension of Iterable<T>
 public interface Generator<T> {
     T generate();
-    void toDestination(Destination<T> destination) throws IOException;
 }
