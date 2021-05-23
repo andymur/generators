@@ -6,6 +6,7 @@ import com.andymur.pg.generators.dest.Destination;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -62,6 +63,22 @@ public class StringGenerator implements Generator<String> {
 
         return builder.toString();
 	}
+
+    @Override
+    public Iterator<String> iterator() {
+        return new Iterator<>() {
+            @Override
+            public boolean hasNext() {
+                // let's say we have infinite generators for now
+                return true;
+            }
+
+            @Override
+            public String next() {
+                return generate();
+            }
+        };
+    }
 
     int charToCodePoint(char c) {
         return Character.codePointAt(new char[] {c}, 0);

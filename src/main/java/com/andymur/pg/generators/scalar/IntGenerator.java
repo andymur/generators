@@ -58,6 +58,22 @@ public class IntGenerator implements Generator<Integer> {
         }
     }
 
+    @Override
+    public Iterator<Integer> iterator() {
+        return new Iterator<>() {
+            @Override
+            public boolean hasNext() {
+                // let's say we have infinite generators for now;
+                return true;
+            }
+
+            @Override
+            public Integer next() {
+                return generate();
+            }
+        };
+    }
+
     private int generateUsingForSetGenerator() {
 
         final List<Integer> l = new ArrayList<>(fromSet);

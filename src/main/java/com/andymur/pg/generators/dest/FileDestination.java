@@ -39,8 +39,8 @@ public class FileDestination<T> implements Destination<T> {
     }
 
     @Override
-    public void write(Generator<T> generator, EnumMap<Instruction, WriteInstruction> instructions) throws IOException {
-        WriteInstruction genNumberInstruction = instructions.get(Instruction.GENERATED_NUMBER);
+    public void write(Generator<T> generator, EnumMap<Instruction, WriteInstruction<T>> instructions) throws IOException {
+        WriteInstruction<T> genNumberInstruction = instructions.get(Instruction.GENERATED_NUMBER);
 
         if (genNumberInstruction == null) {
             write(generator);
